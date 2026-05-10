@@ -22,5 +22,9 @@ def health():
 
 
 from app.auth.router import router as auth_router
+from app.memos.router import router as memos_router
+from app.tags.router import router as tags_router
 
 app.include_router(auth_router)
+app.include_router(memos_router)
+app.include_router(tags_router)
