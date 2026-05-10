@@ -1,26 +1,43 @@
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getMe, logout, type User } from "@/lib/api";
 import MemoPane from "./components/MemoPane";
 
-const API_URL = process.env.API_URL ?? "http://localhost:8000";
+export default function MemosPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
-export default async function MemosPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("access_token");
-  if (!token) redirect("/auth/login");
+  useEffect(() => {
+    getMe().then((u) => {
+      if (!u) {
+        router.replace("/auth/login");
+      } else {
+        setUser(u);
+      }
+    });
+  }, [router]);
 
-  const res = await fetch(`${API_URL}/auth/me`, {
-    headers: { Cookie: `access_token=${token.value}` },
-    cache: "no-store",
-  });
-  if (!res.ok) redirect("/auth/login");
-  const user = await res.json();
+  async function handleLogout() {
+    await logout();
+    router.replace("/auth/login");
+  }
+
+  if (!user) return null;
 
   return (
     <div className="h-screen flex flex-col">
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">メモアプリ</h1>
-        <span className="text-sm text-gray-500">{user.email}</span>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-500">{user.email}</span>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-red-500 hover:text-red-700"
+          >
+            ログアウト
+          </button>
+        </div>
       </header>
       <MemoPane />
     </div>
