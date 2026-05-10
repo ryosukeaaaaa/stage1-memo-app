@@ -30,8 +30,8 @@ def login(body: schemas.LoginRequest, response: Response, db: Session = Depends(
         key="access_token",
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=False,
+        samesite="none",
+        secure=True,
         max_age=60 * 60 * 24 * 7,
     )
     return {"message": "Logged in"}
