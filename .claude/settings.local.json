@@ -11,7 +11,8 @@
       "Bash(npx tsc *)",
       "Bash(gh repo *)",
       "Bash(openssl rand *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(curl *)"
     ]
   }
 }
