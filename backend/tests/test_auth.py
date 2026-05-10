@@ -17,3 +17,41 @@ def test_create_and_decode_token():
 def test_decode_invalid_token():
     result = decode_access_token("invalid.token.here")
     assert result is None
+
+
+def test_register(client):
+    res = client.post("/auth/register", json={"email": "test@example.com", "password": "pass1234"})
+    assert res.status_code == 201
+    assert res.json()["email"] == "test@example.com"
+
+
+def test_register_duplicate_email(client):
+    client.post("/auth/register", json={"email": "test@example.com", "password": "pass1234"})
+    res = client.post("/auth/register", json={"email": "test@example.com", "password": "other"})
+    assert res.status_code == 409
+
+
+def test_login_success(client):
+    client.post("/auth/register", json={"email": "test@example.com", "password": "pass1234"})
+    res = client.post("/auth/login", json={"email": "test@example.com", "password": "pass1234"})
+    assert res.status_code == 200
+    assert "access_token" in res.cookies
+
+
+def test_login_wrong_password(client):
+    client.post("/auth/register", json={"email": "test@example.com", "password": "pass1234"})
+    res = client.post("/auth/login", json={"email": "test@example.com", "password": "wrong"})
+    assert res.status_code == 401
+
+
+def test_me_authenticated(client):
+    client.post("/auth/register", json={"email": "test@example.com", "password": "pass1234"})
+    client.post("/auth/login", json={"email": "test@example.com", "password": "pass1234"})
+    res = client.get("/auth/me")
+    assert res.status_code == 200
+    assert res.json()["email"] == "test@example.com"
+
+
+def test_me_unauthenticated(client):
+    res = client.get("/auth/me")
+    assert res.status_code == 401
